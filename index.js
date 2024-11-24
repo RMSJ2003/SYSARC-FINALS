@@ -10,6 +10,9 @@ import fs from "fs";
 import csv from "csv-parser";
 import { log } from "console";
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const highProteinFoods = [];
 
 fs.createReadStream("./data/macros_dataset.csv")
@@ -38,7 +41,7 @@ const db = new pg.Client({
     user: "postgres",
     host: "localhost",
     database: "SYSARC Finals",
-    password: "postgres",
+    password: process.env.POSTGRES_PASSWORD,
     port: 5432,
 });
 db.connect((err) => {
