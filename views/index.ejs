@@ -1,61 +1,92 @@
 <%- include("partials/header.ejs") %>
 
-<body>
-    <div class="container h-100">
-        <div class="row justify-content-center">
-            <div class="col-6">
-                <img src="images/Macro Care Logo.png" class="mx-auto d-block logo" alt="Macro Care Logo">
+    <body>
+        <div class="container h-100">
+            <div class="row justify-content-center">
+                <div class="col-6">
+                    <img src="images/Macro Care Logo.png" class="mx-auto d-block logo" alt="Macro Care Logo">
+                </div>
             </div>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-6 rounded-5 py-4 inputSection">
-                <form action="/get-macros" method="POST">
-                    <div class="row justify-content-center my-2">
-                        <label for="foodInput" class="col-5 p-0 properties">Food:</label>
-                        <input type="text" id="foodInput" name="food" class="col-5 rounded-5 values" placeholder="e.g. Chicken Breast, Lettuce,...">    
-                    </div>
-                    <div class="row justify-content-center my-2">
-                        <label for="varietyInput" class="col-5 p-0 properties">Variety:</label>
-                        <input type="text" id="varietyInput" name="variety" class="col-5 rounded-5 values" placeholder="e.g. Boiled, Fried,...">    
-                    </div>
-                    <div class="row justify-content-center my-2">
-                        <label for="servingSizeInput" class="col-5 p-0 properties">Serving Size:</label>
-                        <input type="text" id="servingSizeInput" name="servingSize" class="col-5 rounded-5 values" placeholder="e.g. 100g, 1kg,...">    
-                    </div>
-                    <div class="row justify-content-center my-2">
-                        <div class="col-10 text-end pe-0"><input type="submit" value="Submit" class="rounded-5 px-2 py-1"></div>
-                    </div>
-                </form>
+            <div class="row justify-content-center">
+                <div class="col-6 rounded-5 py-4 inputSection">
+                    <form action="/get-macros" method="POST">
+                        <div class="row justify-content-center my-2">
+                            <label for="foodInput" class="col-5 p-0 properties">Food:</label>
+                            <input type="text" id="foodInput" name="food" class="col-5 rounded-5 values"
+                                placeholder="e.g. Chicken Breast, Lettuce,..." required>
+                        </div>
+                        <div class="row justify-content-center my-2">
+                            <label for="varietyInput" class="col-5 p-0 properties">Variety (optional):</label>
+                            <input type="text" id="varietyInput" name="variety" class="col-5 rounded-5 values"
+                                placeholder="e.g. Boiled, Fried,...">
+                        </div>
+                        <div class="row justify-content-center my-2">
+                            <label for="servingSizeInput" class="col-5 p-0 properties">Serving Size:</label>
+                            <input type="text" id="servingSizeInput" name="servingSize" class="col-5 rounded-5 values"
+                                placeholder="e.g. 100g, 1kg,..." required>
+                        </div>
+                        <div class="row justify-content-center my-2">
+                            <div class="col-10 text-end pe-0"><input type="submit" value="Submit"
+                                    class="rounded-5 px-2 py-1"></div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        <div class="row justify-content-center mt-5">
-            <div class="col-6 rounded-5 py-4 outputSection">
-                <div class="row justify-content-center my-2">
-                    <div class="col-5">
-                        <% if (locals.foodName || locals.calories || locals.protein || locals.carbs || locals.fats) { %>
-                            <div class="row retrievedValue">
-                                Food Name: <%= foodName %>
-                            </div>
-                            <div class="row my-4 retrievedValue">
-                                Calories: <%= calories %>
-                            </div>
-                            <div class="row my-4 retrievedValue">
-                                Protein: <%= protein %>
-                            </div>
-                            <div class="row my-4 retrievedValue">
-                                Carbs: <%= carbs %>
-                            </div>
-                            <div class="row retrievedValue">
-                                Fats: <%= fats %>
-                            </div>
-                        <% } %>
-                    </div>
-                    <div class="col-5">
-                        <!-- Use EJS to name the alt -->
-                        <img src="<%= locals.imgURL ? locals.imgURL : '' %>" alt="<%= locals.foodName ? locals.foodName : '' %>" class="img-fluid food-img"> 
+            <div class="row justify-content-center mt-5">
+                <div class="col-6 rounded-5 py-4 outputSection">
+                    <div class="row justify-content-center my-2">
+                        <div class="col-5">
+                            <% if (locals.foodName || locals.calories || locals.protein || locals.carbs || locals.fats)
+                                { %>
+                                <div class="row retrievedValue">
+                                    Food Name: <%= foodName %>
+                                </div>
+                                <div class="row my-4 retrievedValue">
+                                    Calories: <%= calories %>
+                                </div>
+                                <div class="row my-4 retrievedValue">
+                                    Protein: <%= protein %>
+                                </div>
+                                <div class="row my-4 retrievedValue">
+                                    Carbs: <%= carbs %>
+                                </div>
+                                <div class="row retrievedValue">
+                                    Fats: <%= fats %>
+                                </div>
+                                <% } %>
+                        </div>
+                        <div class="col-5">
+                            <!-- Use EJS to name the alt -->
+                            <img src="<%= locals.imgURL ? locals.imgURL : '' %>"
+                                alt="<%= locals.foodName ? locals.foodName : '' %>" class="img-fluid food-img">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="row justify-content-center mt-5">
+                <div class="col-6 rounded-5 py-4 outputSection">
+                    <label for="dropdown">
+                        <h2>High Protein Foods</h2>
+                    </label>
+                    <select id="dropdown" name="dropdown">
+                        <% highProteinFoods.forEach(food=> { %>
+                            <option>
+                                <%= food.food_name %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
 
-<%- include("partials/footer.ejs") %>
+            <script>
+                // When user selects a high protein food from dropdown it automatically fills the food input
+                const dropdown = document.getElementById("dropdown");
+
+                dropdown.addEventListener("input", () => {
+                    document.getElementById("foodInput").value = dropdown.value;
+                });
+            </script>
+
+
+
+            <%- include("partials/footer.ejs") %>

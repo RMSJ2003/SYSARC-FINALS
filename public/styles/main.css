@@ -63,3 +63,12 @@ input[type="text"]:focus {
     font-family: 'Libre Baskerville', serif;
     font-size: small;
 }
+
+h2 {
+    text-align: center;
+}
+
+ul {
+    text-align: center;
+    list-style: none;
+}

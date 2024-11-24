@@ -2,6 +2,24 @@ import express from "express";
 import axios from "axios";
 import bodyParser from "body-parser";
 
+// Postgresql 
+import pg from "pg";
+
+// Reading High Protein foods from Kaggle Datasets - Start
+import fs from "fs";
+import csv from "csv-parser";
+import { log } from "console";
+
+const highProteinFoods = [];
+
+fs.createReadStream("./data/macros_dataset.csv")
+    .pipe(csv())
+    .on("data", (data) => highProteinFoods.push(data))
+    .on("end", () => {
+        console.log(highProteinFoods); // Process or use your data here
+    });
+// Reading High Protein foods from Kaggle Datasets - End
+
 const app = express();
 const port = 3000;
 const API_URL = "https://trackapi.nutritionix.com/v2/natural";
@@ -13,11 +31,58 @@ const config = {
         "x-app-id": x_app_id
     }
 }
-const d = new Date(); 
+const d = new Date();
 var fullYear = d.getFullYear();
 
-function format_name(name){
-    return name.slice(0,1).toUpperCase() + name.slice(1,name.length).toLowerCase()
+const db = new pg.Client({
+    user: "postgres",
+    host: "localhost",
+    database: "SYSARC Finals",
+    password: "postgres",
+    port: 5432,
+});
+db.connect((err) => {
+    if (err) {
+        console.error("Failed to connect to the database:", err.stack);
+    } else {
+        console.log("Connected to the database.");
+
+        // SQL to create the 'users' table if it doesn't exist
+        const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS highProteinFoods (
+	            id SERIAL PRIMARY KEY,
+	            food_name VARCHAR(255) NOT NULL
+            );
+        `;
+
+        const deleteContent = `DELETE FROM highProteinFoods;`;
+
+        // Create the base query
+        let populateTableQuery = `INSERT INTO highProteinFoods (food_name) VALUES `;
+
+        const foods = [];
+        for (let i = 0; i < highProteinFoods.length; i++) {
+            populateTableQuery += `('${highProteinFoods[i].food_name}')`;
+            
+            if (i < highProteinFoods.length - 1) populateTableQuery += ", "
+        }
+                
+        db.query(deleteContent + createTableQuery + populateTableQuery, (err) => {
+            if (err) {
+                console.error("Error creating users table:", err.stack);
+            } else {
+                console.log("Users table is ready.");
+            }
+        });
+    }
+});
+
+function format_name(name) {
+    return name.slice(0, 1).toUpperCase() + name.slice(1, name.length).toLowerCase()
+}
+
+async function getFoodsFromDb() {
+    return (await db.query("SELECT * FROM highProteinFoods;")).rows;
 }
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,7 +90,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.get("/", async (req, res) => {
-    res.render("index.ejs", { year: d.getFullYear() });
+    const result = await getFoodsFromDb();
+    
+
+    res.render("index.ejs", {
+        year: d.getFullYear(),
+        highProteinFoods: result
+    });
 });
 
 app.post("/get-macros", async (req, res) => {
@@ -47,7 +118,8 @@ app.post("/get-macros", async (req, res) => {
         carbs: result.data.foods[0].nf_total_carbohydrate,
         fats: result.data.foods[0].nf_total_fat,
         imgURL: result.data.foods[0].photo.thumb,
-        year: d.getFullYear()
+        year: d.getFullYear(),
+        highProteinFoods: results
     });
     console.log(result.data);
     // console.log(result.data.foods[0].nf_calories);
