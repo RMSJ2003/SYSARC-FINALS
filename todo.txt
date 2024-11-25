@@ -1,0 +1,8 @@
+
+[x] Automatic food input fill up on load.
+- Spamming Input tags Error Handling
+- [] food
+- [] servingSize
+[] Finalizie UI/UX
+[] Add animation
+[] Responsive Website

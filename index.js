@@ -19,7 +19,7 @@ fs.createReadStream("./data/macros_dataset.csv")
     .pipe(csv())
     .on("data", (data) => highProteinFoods.push(data))
     .on("end", () => {
-        console.log(highProteinFoods); // Process or use your data here
+        // Process or use your data here
     });
 // Reading High Protein foods from Kaggle Datasets - End
 
@@ -122,9 +122,8 @@ app.post("/get-macros", async (req, res) => {
         fats: result.data.foods[0].nf_total_fat,
         imgURL: result.data.foods[0].photo.thumb,
         year: d.getFullYear(),
-        highProteinFoods: results
+        highProteinFoods: highProteinFoods
     });
-    console.log(result.data);
     // console.log(result.data.foods[0].nf_calories);
     // render the macros and the image
 });

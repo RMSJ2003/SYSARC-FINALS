@@ -81,9 +81,14 @@
             <script>
                 // When user selects a high protein food from dropdown it automatically fills the food input
                 const dropdown = document.getElementById("dropdown");
+                transferFoodtoInput();
+
+                function transferFoodtoInput() {
+                    document.getElementById("foodInput").value = dropdown.value;
+                }
 
                 dropdown.addEventListener("input", () => {
-                    document.getElementById("foodInput").value = dropdown.value;
+                    transferFoodtoInput();
                 });
             </script>
 
