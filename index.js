@@ -1,4 +1,5 @@
 import express from "express";
+import session from "express-session";
 import axios from "axios";
 import bodyParser from "body-parser";
 
@@ -66,10 +67,10 @@ db.connect((err) => {
         const foods = [];
         for (let i = 0; i < highProteinFoods.length; i++) {
             populateTableQuery += `('${highProteinFoods[i].food_name}')`;
-            
+
             if (i < highProteinFoods.length - 1) populateTableQuery += ", "
         }
-                
+
         db.query(deleteContent + createTableQuery + populateTableQuery, (err) => {
             if (err) {
                 console.error("Error creating users table:", err.stack);
@@ -91,41 +92,77 @@ async function getFoodsFromDb() {
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
+app.use(session({
+    secret: process.env.SESSION_KEY, // change this to a secure key
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // set to true if using HTTPS
+}));
+
+app.use((req, res, next) => {
+    req.session.formError;
+    req.session.searchResult;
+
+    next();
+});
+
 
 app.get("/", async (req, res) => {
     const result = await getFoodsFromDb();
-    
+
+    const searchResultToDisplay = req.session.searchResult;
+    req.session.searchResult = undefined
+
+    const errorToDisplay = req.session.formError;
+    req.session.formError = undefined;
 
     res.render("index.ejs", {
         year: d.getFullYear(),
-        highProteinFoods: result
+        highProteinFoods: result,
+        searchResult: searchResultToDisplay,
+        error: errorToDisplay
     });
 });
 
 app.post("/get-macros", async (req, res) => {
-    // Get the values from the form to send to Nutritionix API
-    const food = req.body.food;
-    const variety = req.body.variety;
-    const servingSize = req.body.servingSize;
-    const querytoSend = `${variety} ${food} ${servingSize}`;
-    const body = {
-        query: querytoSend
-    };
 
-    // Request macros data from Nutritionix API
-    const result = await axios.post(`${API_URL}/nutrients`, body, config);
-    res.render("index.ejs", {
-        foodName: format_name(food),
-        calories: result.data.foods[0].nf_calories,
-        protein: result.data.foods[0].nf_protein,
-        carbs: result.data.foods[0].nf_total_carbohydrate,
-        fats: result.data.foods[0].nf_total_fat,
-        imgURL: result.data.foods[0].photo.thumb,
-        year: d.getFullYear(),
-        highProteinFoods: highProteinFoods
-    });
-    // console.log(result.data.foods[0].nf_calories);
-    // render the macros and the image
+    try {
+        // Get the values from the form to send to Nutritionix API
+        const food = req.body.food;
+        const variety = req.body.variety;
+        const servingSize = req.body.servingSize;
+        const querytoSend = `${variety} ${food} ${servingSize}`;
+        const body = {
+            query: querytoSend
+        };
+
+        // Request macros data from Nutritionix API
+        const result = await axios.post(`${API_URL}/nutrients`, body, config);
+
+        // Add the formatted food name and the result data to the session
+        req.session.searchResult = {
+            foodName: format_name(food),
+            macros: result.data.foods[0] // Add other relevant fields here if needed
+        };
+
+        
+
+        // Redirect to the homepage to display results
+        res.redirect("/");
+        // res.render("index.ejs", {
+        //     foodName: format_name(food),
+        //     calories: result.data.foods[0].nf_calories,
+        //     protein: result.data.foods[0].nf_protein,
+        //     carbs: result.data.foods[0].nf_total_carbohydrate,
+        //     fats: result.data.foods[0].nf_total_fat,
+        //     imgURL: result.data.foods[0].photo.thumb,
+        //     year: d.getFullYear(),
+        //     highProteinFoods: highProteinFoods
+        // });
+    } catch (error) {
+        req.session.formError = "Invalid Input";
+        res.redirect("/");
+    }
 });
 
 app.listen(port, () => {

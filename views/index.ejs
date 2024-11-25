@@ -29,6 +29,11 @@
                             <div class="col-10 text-end pe-0"><input type="submit" value="Submit"
                                     class="rounded-5 px-2 py-1"></div>
                         </div>
+                        <div class="row justify-content-center my-2">
+                            <div class="col-10 text-center pe-0 text-danger">
+                                <%= error? error : "" %> 
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -36,37 +41,40 @@
                 <div class="col-6 rounded-5 py-4 outputSection">
                     <div class="row justify-content-center my-2">
                         <div class="col-5">
-                            <% if (locals.foodName || locals.calories || locals.protein || locals.carbs || locals.fats)
+                            <% if (searchResult)
                                 { %>
                                 <div class="row retrievedValue">
-                                    Food Name: <%= foodName %>
+                                    Food Name: <%= searchResult.foodName %>
                                 </div>
                                 <div class="row my-4 retrievedValue">
-                                    Calories: <%= calories %>
+                                    Serving Size: <%= searchResult.macros.serving_weight_grams %>g
                                 </div>
                                 <div class="row my-4 retrievedValue">
-                                    Protein: <%= protein %>
+                                    Calories: <%= searchResult.macros.nf_calories %>cal
                                 </div>
                                 <div class="row my-4 retrievedValue">
-                                    Carbs: <%= carbs %>
+                                    Protein: <%= searchResult.macros.nf_protein %>g
+                                </div>
+                                <div class="row my-4 retrievedValue">
+                                    Carbs: <%= searchResult.macros.nf_total_carbohydrate %>g
                                 </div>
                                 <div class="row retrievedValue">
-                                    Fats: <%= fats %>
+                                    Fats: <%= searchResult.macros.nf_total_fat %>g
                                 </div>
                                 <% } %>
                         </div>
                         <div class="col-5">
                             <!-- Use EJS to name the alt -->
-                            <img src="<%= locals.imgURL ? locals.imgURL : '' %>"
-                                alt="<%= locals.foodName ? locals.foodName : '' %>" class="img-fluid food-img">
+                            <img src="<%= searchResult ? searchResult.macros.photo.thumb : '' %>"
+                                alt="<%= searchResult ? searchResult.foodName : '' %>" class="img-fluid food-img">
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row justify-content-center mt-5">
-                <div class="col-6 rounded-5 py-4 outputSection">
-                    <label for="dropdown">
-                        <h2>High Protein Foods</h2>
+                <div class="col-6 rounded-5 py-4 outputSection text-center">
+                    <label for="dropdown" class="me-3">
+                        <h6>High Protein Foods</h6>
                     </label>
                     <select id="dropdown" name="dropdown">
                         <% highProteinFoods.forEach(food=> { %>
