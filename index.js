@@ -49,6 +49,37 @@ db.connect((err) => {
         console.error("Failed to connect to the database:", err.stack);
     } else {
         console.log("Connected to the database.");
+        // Check if the table exists before deleting
+        const checkTableExistsQuery = `
+SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.tables 
+    WHERE table_schema = 'public'  -- or your specific schema
+    AND table_name = 'highProteinFoods'
+);
+`;
+
+        db.query(checkTableExistsQuery, (err, result) => {
+            if (err) {  
+                console.error("Error checking if table exists:", err.stack);
+            } else {
+                const tableExists = result.rows[0].exists;
+
+                if (tableExists) {
+                    const deleteTableQuery = "DELETE FROM highProteinFoods;";
+                    db.query(deleteTableQuery, (err) => {
+                        if (err) {
+                            console.error("Error deleting content of highProteinFoods table:", err.stack);
+                        } else {
+                            console.log("highProteinFoods content has been deleted.");
+                        }
+                    });
+                } else {
+                    console.log("highProteinFoods table does not exist.");
+                }
+            }
+        });
+
 
         // SQL to create the 'users' table if it doesn't exist
         const createTablesQuery = `
@@ -71,7 +102,6 @@ db.connect((err) => {
             );
         `;
 
-        const deleteContent = `DELETE FROM highProteinFoods;`;
 
         // Create the base query
         let populateTableQuery = `INSERT INTO highProteinFoods (food_name) VALUES `;
@@ -83,11 +113,19 @@ db.connect((err) => {
             if (i < highProteinFoods.length - 1) populateTableQuery += ", "
         }
 
-        db.query(deleteContent + createTablesQuery + populateTableQuery, (err) => {
+        db.query(createTablesQuery, (err) => {
             if (err) {
-                console.error("Error creating users table:", err.stack);
+                console.error("Error creating users and/or highProteinFoods tables:", err.stack);
             } else {
-                console.log("Users table is ready.");
+                console.log("users and highProteinFoods table is ready.");
+            }
+        });
+
+        db.query(populateTableQuery, (err) => {
+            if (err) {
+                console.error("Error inserting foods in the highProteinFoods table:", err.stack);
+            } else {
+                console.log("highProteinFoods' data have been inserted.");
             }
         });
     }
@@ -157,7 +195,7 @@ app.post("/get-macros", async (req, res) => {
             macros: result.data.foods[0] // Add other relevant fields here if needed
         };
 
-        
+
 
         // Redirect to the homepage to display results
         res.redirect("/");
