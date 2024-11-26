@@ -9,7 +9,6 @@ import pg from "pg";
 // Reading High Protein foods from Kaggle Datasets - Start
 import fs from "fs";
 import csv from "csv-parser";
-import { log } from "console";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -52,10 +51,23 @@ db.connect((err) => {
         console.log("Connected to the database.");
 
         // SQL to create the 'users' table if it doesn't exist
-        const createTableQuery = `
+        const createTablesQuery = `
             CREATE TABLE IF NOT EXISTS highProteinFoods (
 	            id SERIAL PRIMARY KEY,
 	            food_name VARCHAR(255) NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS users (
+	            id SERIAL PRIMARY KEY,
+	            username VARCHAR(50) NOT NULL UNIQUE,
+	            password VARCHAR(255) NOT NULL,
+                age SMALLINT CHECK (age > 0 AND age <= 150) NOT NULL,
+	            weightInLbs SMALLINT CHECK (weightInLbs > 0 AND weightInLbs <= 1000) NOT NULL,
+	            heightInCm SMALLINT CHECK (heightInCm > 0 AND heightInCm <= 300) NOT NULL,
+	            calories SMALLINT NOT NULL,
+	            proteinPercentage SMALLINT CHECK (proteinPercentage > 0 AND proteinPercentage <= 100) NOT NULL,
+	            fatsPercentage SMALLINT CHECK (fatsPercentage > 0 AND fatsPercentage <= 100) NOT NULL,
+	            carbsPercentage SMALLINT CHECK (carbsPercentage > 0 AND carbsPercentage <= 100) NOT NULL
             );
         `;
 
@@ -71,7 +83,7 @@ db.connect((err) => {
             if (i < highProteinFoods.length - 1) populateTableQuery += ", "
         }
 
-        db.query(deleteContent + createTableQuery + populateTableQuery, (err) => {
+        db.query(deleteContent + createTablesQuery + populateTableQuery, (err) => {
             if (err) {
                 console.error("Error creating users table:", err.stack);
             } else {
