@@ -77,6 +77,7 @@
                         <h6>High Protein Foods</h6>
                     </label>
                     <select id="dropdown" name="dropdown">
+                        <option value=""></option>
                         <% highProteinFoods.forEach(food=> { %>
                             <option>
                                 <%= food.food_name %>
@@ -88,11 +89,13 @@
 
             <script>
                 // When user selects a high protein food from dropdown it automatically fills the food input
+                const foodInput = document.getElementById("foodInput");
                 const dropdown = document.getElementById("dropdown");
-                transferFoodtoInput();
+
+                dropdown.value ? transferFoodtoInput() : foodInput.value = "";
 
                 function transferFoodtoInput() {
-                    document.getElementById("foodInput").value = dropdown.value;
+                    foodInput.value = dropdown.value;
                 }
 
                 dropdown.addEventListener("input", () => {
