@@ -83,6 +83,8 @@ db.connect((err) => {
             if (i < highProteinFoods.length - 1) populateTableQuery += ", "
         }
 
+        console.log(deleteContent +createTableQuery + populateTableQuery)
+
         db.query(deleteContent + createTablesQuery + populateTableQuery, (err) => {
             if (err) {
                 console.error("Error creating users table:", err.stack);
